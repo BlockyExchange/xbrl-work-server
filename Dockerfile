@@ -36,8 +36,8 @@ FROM docker.io/rocm/rocm-terminal:6.3.3
 # Copy the built binary from the builder stage.
 COPY --from=builder /nano-work-server/target/release/nano-work-server /usr/local/bin/nano-work-server
 
-# Set ENTRYPOINT to use shell
-ENTRYPOINT ["sh", "-c"]
+# Copy the startup script into the image
+COPY startup.sh /startup.sh
 
-# Inline CMD with conditional logic
-CMD ["LISTEN_HOST=${LISTEN_HOST:-0.0.0.0}; LISTEN_PORT=${LISTEN_PORT:-7076}; OPTIONS=\"\"; if [ -n \"$CPU_THREADS\" ] && [ \"$CPU_THREADS\" -gt 0 ]; then OPTIONS=\"-c $CPU_THREADS\"; elif [ -n \"$GPU\" ]; then OPTIONS=\"-g $GPU -c 0\"; else OPTIONS=\"-c 0\"; fi; OPTIONS=\"$OPTIONS -l $LISTEN_HOST:$LISTEN_PORT\"; exec nano-work-server $OPTIONS"]
+# Set the entrypoint to run the script with sh
+ENTRYPOINT ["sh", "/startup.sh"]
